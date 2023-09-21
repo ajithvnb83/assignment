@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:intl/intl.dart';
 
 import 'package:assignment/core/utils/common_import.dart';
@@ -75,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 height: 50,
                 width: screenWidth,
-                color: AppColors.whiteColor,
+                color: AppColors.stackBackgroundColor,
               ),
             ),
             Positioned(
@@ -264,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(ConstString.kPlanSelectionMessage),
           AppSizedBox.h35,
           SizedBox(
-            width: screenWidth * 0.95,
+            width: screenWidth * 0.75,
             height: 250,
             child: ListView.separated(
               itemCount: listOfPlanSelectionEntity.length,
