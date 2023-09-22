@@ -17,7 +17,7 @@ class ConstString {
   static String kPlanSelectionMessage =
       "choose one of our recommend plans or make your own";
   static String kAccountSelectionButton = "Tap for 1-click KYC";
-  static String kAccountSelectionQuestion = "how do you wish to repay?";
+  static String kAccountSelectionQuestion = "where should we send the money?";
   static String kAccountSelectionMessage =
       "amount will be credited to this bank account, EMI will also be credited from this bank account";
 }

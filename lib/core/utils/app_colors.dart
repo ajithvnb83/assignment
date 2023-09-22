@@ -8,5 +8,5 @@ class AppColors {
   static Color helperButtonColor = const Color(0xFF1d2025);
   static Color whiteColor = const Color(0xFFffffff);
   static Color buttonColor = const Color(0xFF3b479b);
-  static Color indicatorColor = const Color(0xFFd18c6f);
+  static Color progressBarColor = const Color(0xFFcd8d73);
 }

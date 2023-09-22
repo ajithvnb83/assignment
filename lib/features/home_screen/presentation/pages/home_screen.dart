@@ -1,12 +1,10 @@
-import 'dart:math';
-
 import 'package:intl/intl.dart';
 
 import 'package:assignment/core/utils/common_import.dart';
 
 import 'package:assignment/core/widgets/cta_button.dart';
 import 'package:assignment/core/widgets/stack_icon_btn.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 import '../../domain/entities/plan_selection_entity.dart';
 
@@ -19,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   ValueNotifier<int> stackNumber = ValueNotifier<int>(0);
-  ValueNotifier<int> creditAmount = ValueNotifier<int>(0);
+  ValueNotifier<int> creditAmount = ValueNotifier<int>(10000);
   ValueNotifier<int> selectedPlan = ValueNotifier<int>(0);
 
   ValueNotifier<Map<String, int>> selectionPeriod =
@@ -45,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.whiteColor,
       body: SafeArea(
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
             Column(children: [
               AppSizedBox.h20,
@@ -84,7 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
               bottom: 0,
               child: CTAButton(
                 callbackFunction: () {
-                  stackNumber.value = 1;
+                  if (stackNumber.value == 0) {
+                    stackNumber.value = 1;
+                  } else if (stackNumber.value == 1) {
+                    stackNumber.value = 2;
+                  } else {
+                    stackNumber.value = 0;
+                  }
                 },
                 buttonText: ConstString.kAmountSelectionButton,
               ),
@@ -100,9 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
         valueListenable: stackNumber,
         builder: ((context, value, child) {
           return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AnimatedContainer(
-                height: value == 0 ? screenHeight * 0.77 : 50,
+                height: value == 0 ? screenHeight * 0.77 : screenHeight * 0.08,
                 width: screenWidth,
                 alignment: Alignment.topLeft,
                 duration: const Duration(seconds: 1),
@@ -118,16 +125,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: value == 0
                     ? 0
                     : value == 1
-                        ? screenHeight * 0.77
-                        : 50,
+                        ? screenHeight * 0.77 - (screenHeight * 0.08)
+                        : screenHeight * 0.08,
                 width: screenWidth,
-                alignment: Alignment.topLeft,
                 duration: const Duration(seconds: 1),
                 curve: Curves.easeIn,
                 color: value == 1
                     ? AppColors.stackBackgroundColor
                     : AppColors.stackBackgroundColor.withOpacity(0.9),
-                child: planSelectionWidget(),
+                child: planSelectionWidget(selectedStackIndex: value),
+              ),
+              AnimatedContainer(
+                height: value == 0
+                    ? 0
+                    : value == 1
+                        ? 0
+                        : screenHeight * 0.77 - screenHeight * 0.16,
+                width: screenWidth,
+                duration: const Duration(seconds: 1),
+                curve: Curves.easeIn,
+                color: value == 1
+                    ? AppColors.stackBackgroundColor
+                    : AppColors.stackBackgroundColor.withOpacity(0.9),
+                child: accountSelectionWidget(selectedStackIndex: value),
               ),
             ],
           );
@@ -137,82 +157,76 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget amountSelectionWidget({required int selectedStackIndex}) {
     if (selectedStackIndex == 0) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 50),
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
         child: Wrap(
           children: [
-            Text("$userName, ${ConstString.kAmountSelectionQuestion}"),
+            Text(
+              "$userName, ${ConstString.kAmountSelectionQuestion}",
+              style: TextStyle(color: AppColors.whiteColor, fontSize: 18),
+            ),
             AppSizedBox.h15,
             Text(
               "${ConstString.kAmountSelectionMessage} ₹${NumberFormat('#,##,##0').format(totalAmount)}",
-              style: const TextStyle(height: 1.7),
+              style: TextStyle(
+                  height: 1.7, color: AppColors.whiteColor, fontSize: 14),
             ),
-            AppSizedBox.h45,
+            SizedBox(
+              height: screenHeight * 0.09,
+            ),
             Align(
               alignment: Alignment.topCenter,
               child: Container(
                 height: screenHeight * 0.35,
                 width: screenWidth * 0.80,
                 decoration: BoxDecoration(
-                    color: Colors.orange,
+                    color: AppColors.whiteColor,
                     borderRadius: BorderRadius.circular(30)),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                        height: 200,
-                        child: SfRadialGauge(axes: <RadialAxis>[
-                          RadialAxis(
-                              minimum: 0,
-                              maximum: 100,
-                              startAngle: 270,
-                              endAngle: 270,
-                              showLabels: false,
-                              showTicks: false,
-                              radiusFactor: 0.6,
-                              axisLineStyle: const AxisLineStyle(
-                                  cornerStyle: CornerStyle.bothFlat,
-                                  color: Colors.black12,
-                                  thickness: 12),
-                              pointers: <GaugePointer>[
-                                const RangePointer(
-                                    value: 100,
-                                    cornerStyle: CornerStyle.bothFlat,
-                                    width: 12,
-                                    sizeUnit: GaugeSizeUnit.logicalPixel,
-                                    color: Colors.orangeAccent,
-                                    gradient: SweepGradient(colors: <Color>[
-                                      Color(0XFFFFD180),
-                                      Color(0XFFFFAB40)
-                                    ], stops: <double>[
-                                      0.25,
-                                      0.75
-                                    ])),
-                                MarkerPointer(
-                                    value: 10,
-                                    enableDragging: true,
-                                    onValueChanged: (val) {
-                                      //TODO
-                                    },
-                                    markerHeight: 20,
-                                    markerWidth: 20,
-                                    markerType: MarkerType.image,
-                                    imageUrl: 'assets/images/star.png',
-                                    color: const Color(0XFFFFAB40),
-                                    borderWidth: 2,
-                                    borderColor: Colors.white54)
-                              ],
-                              annotations: const <GaugeAnnotation>[
-                                GaugeAnnotation(
-                                    angle: 90,
-                                    axisValue: 5,
-                                    positionFactor: 0.1,
-                                    widget: Text('${10}%',
-                                        style: TextStyle(
-                                            fontSize: 50,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0XFFFFAB40))))
-                              ])
-                        ])),
+                    AppSizedBox.h20,
+                    ValueListenableBuilder(
+                        valueListenable: creditAmount,
+                        builder: (context, value, _) {
+                          return SleekCircularSlider(
+                              initialValue: value.toDouble(),
+                              min: 0,
+                              max: totalAmount.toDouble(),
+                              appearance: CircularSliderAppearance(
+                                customColors: CustomSliderColors(
+                                  dynamicGradient: false,
+                                  progressBarColor: AppColors.progressBarColor,
+                                ),
+                                startAngle: 270,
+                                angleRange: 360,
+                              ),
+                              innerWidget: (double percentage) {
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(ConstString.kCreditAmount),
+                                    Container(
+                                      padding: const EdgeInsets.only(
+                                        bottom:
+                                            5, // Space between underline and text
+                                      ),
+                                      decoration: const BoxDecoration(
+                                          border: Border(
+                                              bottom: BorderSide(
+                                        color: Colors.black,
+                                        width: 1.0, // Underline thickness
+                                      ))),
+                                      child: Text(
+                                        "₹ ${NumberFormat('#,##,##0').format(percentage.round())}",
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                              onChange: (double value) {
+                                creditAmount.value = value.round();
+                              });
+                        }),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
                       child: Text(ConstString.kAmountSelectionAnnouncement),
@@ -241,6 +255,94 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(ConstString.kCreditAmount),
                     AppSizedBox.h5,
+                    ValueListenableBuilder(
+                        valueListenable: creditAmount,
+                        builder: (context, value, _) {
+                          return Text(
+                              "₹${NumberFormat('#,##,##0').format(value)}");
+                        }),
+                  ],
+                ),
+                const Center(
+                  child: Icon(Icons.arrow_downward_sharp),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget planSelectionWidget({required int selectedStackIndex}) {
+    if (selectedStackIndex == 1) {
+      return Wrap(
+        children: [
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 50),
+              child: SizedBox(
+                height: 250,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(10, (index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              height: 50,
+                              width: screenWidth * 0.30,
+                              color: Colors.amber,
+                            ),
+                            Positioned.fill(
+                              top: -10,
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: Transform.translate(
+                                  offset: const Offset(0, 0),
+                                  child: Card(
+                                    child: Container(
+                                      height: 17,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                      child: Text(
+                                        ConstString.kRecommended,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              )),
+        ],
+      );
+    } else {
+      return GestureDetector(
+        onTap: () {
+          stackNumber.value = 1;
+        },
+        child: SizedBox(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(ConstString.kCreditAmount),
+                    AppSizedBox.h5,
                     Text(
                         "₹${NumberFormat('#,##,##0').format(creditAmount.value)}"),
                   ],
@@ -256,82 +358,72 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget planSelectionWidget() {
+  Widget accountSelectionWidget({required int selectedStackIndex}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 50),
       child: Wrap(
         children: [
-          Text(ConstString.kPlanSelectionQuestion),
-          AppSizedBox.h5,
-          Text(ConstString.kPlanSelectionMessage),
-          AppSizedBox.h35,
+          Text(
+            ConstString.kAccountSelectionQuestion,
+            style: TextStyle(color: AppColors.whiteColor, fontSize: 18),
+          ),
+          AppSizedBox.h15,
+          Text(
+            ConstString.kAccountSelectionMessage,
+            style: TextStyle(color: AppColors.whiteColor, fontSize: 14),
+          ),
+          AppSizedBox.h50,
           SizedBox(
-            width: screenWidth * 0.75,
+            width: screenWidth * 0.95,
             height: 250,
             child: ListView.separated(
-              itemCount: listOfPlanSelectionEntity.length,
-              scrollDirection: Axis.horizontal,
+              itemCount: 1,
+              scrollDirection: Axis.vertical,
               itemBuilder: (context, index) {
-                return Stack(
-                  // overflow: Overflow.visible,
-                  clipBehavior: Clip.none,
+                return Row(
                   children: [
                     Container(
-                      height: 150,
-                      width: 150,
-                      color: Colors.amber,
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Center(
+                        child: Image.asset(
+                          "assets/img/hdfc_logo.png",
+                          height: 15,
+                          width: 15,
+                        ),
+                      ),
                     ),
-                    if (listOfPlanSelectionEntity[index].isRecommened)
-                      Positioned(
-                          top: -05,
-                          child: Container(
-                            height: 20,
-                            width: 100,
-                            color: Colors.white,
-                            child: Text(ConstString.kRecommended),
-                          )),
+                    AppSizedBox.w10,
+                    const Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [Text("HDFC Bank"), Text("50100117009192")],
+                    ),
+                    const Spacer(),
+                    Radio(
+                      value: false,
+                      groupValue: true,
+                      fillColor: MaterialStateColor.resolveWith(
+                          (states) => Colors.green), //<-- SEE HERE
+                      onChanged: (value) {},
+                    ),
                   ],
                 );
               },
               separatorBuilder: (BuildContext context, int index) {
-                return AppSizedBox.w20;
+                return AppSizedBox.h20;
               },
+            ),
+          ),
+          Container(
+            child: Center(
+              child: Text(ConstString.kChangeAccount),
             ),
           )
         ],
       ),
     );
   }
-
-  // Widget planSelectionWidget() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 50),
-  //     child: Wrap(
-  //       children: [
-  //         Text(ConstString.kPlanSelectionQuestion),
-  //         AppSizedBox.h5,
-  //         Text(ConstString.kPlanSelectionMessage),
-  //         AppSizedBox.h35,
-  //         SizedBox(
-  //           width: screenWidth * 0.95,
-  //           height: 250,
-  //           child: ListView.separated(
-  //             itemCount: listOfPlanSelectionEntity.length,
-  //             scrollDirection: Axis.horizontal,
-  //             itemBuilder: (context, index) {
-  //               return Container(
-  //                 height: 250,
-  //                 width: 250,
-  //                 color: Colors.amber,
-  //               );
-  //             },
-  //             separatorBuilder: (BuildContext context, int index) {
-  //               return AppSizedBox.w20;
-  //             },
-  //           ),
-  //         )
-  //       ],
-  //     ),
-  //   );
-  // }
 }
