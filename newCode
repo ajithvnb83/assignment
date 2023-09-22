@@ -1,0 +1,450 @@
+import 'package:intl/intl.dart';
+
+import 'package:assignment/core/utils/common_import.dart';
+
+import 'package:assignment/core/widgets/cta_button.dart';
+import 'package:assignment/core/widgets/stack_icon_btn.dart';
+import 'package:sleek_circular_slider/sleek_circular_slider.dart';
+
+import '../../domain/entities/plan_selection_entity.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  ValueNotifier<int> stackNumber = ValueNotifier<int>(0);
+  ValueNotifier<int> creditAmount = ValueNotifier<int>(10000);
+  ValueNotifier<int> selectedPlan = ValueNotifier<int>(0);
+
+  ValueNotifier<Map<String, int>> selectionPeriod =
+      ValueNotifier<Map<String, int>>({"duration": 0, "amount": 0});
+  ValueNotifier<Map<String, dynamic>> selectionAccount =
+      ValueNotifier<Map<String, dynamic>>({"bankName": "", "accountNumber": 0});
+
+  //it can be change or modify based on the previous page value or same page API hit
+  int totalAmount = 487891;
+  String userName = "nikunj";
+
+  List<PlanSelectionEntity> listOfPlanSelectionEntity = [
+    const PlanSelectionEntity(amount: 4247, month: 12, isRecommened: false),
+    const PlanSelectionEntity(amount: 5580, month: 9, isRecommened: true),
+    const PlanSelectionEntity(amount: 8245, month: 6, isRecommened: false),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      backgroundColor: AppColors.whiteColor,
+      body: SafeArea(
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Column(children: [
+              AppSizedBox.h20,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    stackIconButton(
+                        callBackFunction: () {},
+                        icon: const Icon(
+                          Icons.close,
+                        ),
+                        iconColor: AppColors.whiteColor,
+                        filledColor: AppColors.stackBackgroundColor),
+                    stackIconButton(
+                        callBackFunction: () {},
+                        icon: const Icon(
+                          Icons.question_mark,
+                        ),
+                        iconColor: AppColors.whiteColor,
+                        filledColor: AppColors.stackBackgroundColor)
+                  ],
+                ),
+              )
+            ]),
+            Positioned(bottom: 50, child: assembleWidget()),
+            Positioned(
+              bottom: 0,
+              child: Container(
+                height: 50,
+                width: screenWidth,
+                color: AppColors.stackBackgroundColor,
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              child: CTAButton(
+                callbackFunction: () {
+                  if (stackNumber.value == 0) {
+                    stackNumber.value = 1;
+                  } else if (stackNumber.value == 1) {
+                    stackNumber.value = 2;
+                  } else {
+                    stackNumber.value = 0;
+                  }
+                },
+                buttonText: ConstString.kAmountSelectionButton,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget assembleWidget() {
+    return ValueListenableBuilder(
+        valueListenable: stackNumber,
+        builder: ((context, value, child) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AnimatedContainer(
+                height: value == 0 ? screenHeight * 0.77 : screenHeight * 0.08,
+                width: screenWidth,
+                alignment: Alignment.topLeft,
+                duration: const Duration(seconds: 1),
+                curve: Curves.easeIn,
+                color: value == 0
+                    ? AppColors.stackBackgroundColor
+                    : value == 1
+                        ? AppColors.stackBackgroundColor.withOpacity(0.9)
+                        : AppColors.stackBackgroundColor.withOpacity(0.8),
+                child: amountSelectionWidget(selectedStackIndex: value),
+              ),
+              AnimatedContainer(
+                height: value == 0
+                    ? 0
+                    : value == 1
+                        ? screenHeight * 0.77 - (screenHeight * 0.08)
+                        : screenHeight * 0.08,
+                width: screenWidth,
+                duration: const Duration(seconds: 1),
+                curve: Curves.easeIn,
+                color: value == 1
+                    ? AppColors.stackBackgroundColor
+                    : AppColors.stackBackgroundColor.withOpacity(0.9),
+                child: planSelectionWidget(selectedStackIndex: value),
+              ),
+              AnimatedContainer(
+                height: value == 0
+                    ? 0
+                    : value == 1
+                        ? 0
+                        : screenHeight * 0.77 - screenHeight * 0.16,
+                width: screenWidth,
+                duration: const Duration(seconds: 1),
+                curve: Curves.easeIn,
+                color: value == 1
+                    ? AppColors.stackBackgroundColor
+                    : AppColors.stackBackgroundColor.withOpacity(0.9),
+                child: accountSelectionWidget(selectedStackIndex: value),
+              ),
+            ],
+          );
+        }));
+  }
+
+  Widget amountSelectionWidget({required int selectedStackIndex}) {
+    if (selectedStackIndex == 0) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
+        child: Wrap(
+          children: [
+            Text(
+              "$userName, ${ConstString.kAmountSelectionQuestion}",
+              style: TextStyle(color: AppColors.whiteColor, fontSize: 18),
+            ),
+            AppSizedBox.h15,
+            Text(
+              "${ConstString.kAmountSelectionMessage} ₹${NumberFormat('#,##,##0').format(totalAmount)}",
+              style: TextStyle(
+                  height: 1.7, color: AppColors.whiteColor, fontSize: 14),
+            ),
+            SizedBox(
+              height: screenHeight * 0.09,
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                height: screenHeight * 0.35,
+                width: screenWidth * 0.80,
+                decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: BorderRadius.circular(30)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AppSizedBox.h20,
+                    ValueListenableBuilder(
+                        valueListenable: creditAmount,
+                        builder: (context, value, _) {
+                          return SleekCircularSlider(
+                              initialValue: value.toDouble(),
+                              min: 0,
+                              max: totalAmount.toDouble(),
+                              appearance: CircularSliderAppearance(
+                                customColors: CustomSliderColors(
+                                  dynamicGradient: false,
+                                  progressBarColor: AppColors.progressBarColor,
+                                ),
+                                startAngle: 270,
+                                angleRange: 360,
+                              ),
+                              innerWidget: (double percentage) {
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(ConstString.kCreditAmount),
+                                    Container(
+                                      padding: const EdgeInsets.only(
+                                        bottom:
+                                            5, // Space between underline and text
+                                      ),
+                                      decoration: const BoxDecoration(
+                                          border: Border(
+                                              bottom: BorderSide(
+                                        color: Colors.black,
+                                        width: 1.0, // Underline thickness
+                                      ))),
+                                      child: Text(
+                                        "₹ ${NumberFormat('#,##,##0').format(percentage.round())}",
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                              onChange: (double value) {
+                                creditAmount.value = value.round();
+                              });
+                        }),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+                      child: Text(ConstString.kAmountSelectionAnnouncement),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    } else {
+      return GestureDetector(
+        onTap: () {
+          stackNumber.value = 0;
+        },
+        child: SizedBox(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(ConstString.kCreditAmount),
+                    AppSizedBox.h5,
+                    ValueListenableBuilder(
+                        valueListenable: creditAmount,
+                        builder: (context, value, _) {
+                          return Text(
+                              "₹${NumberFormat('#,##,##0').format(value)}");
+                        }),
+                  ],
+                ),
+                const Center(
+                  child: Icon(Icons.arrow_downward_sharp),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget planSelectionWidget({required int selectedStackIndex}) {
+    if (selectedStackIndex == 1) {
+      return Wrap(
+        children: [
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 50),
+              child: SizedBox(
+                height: 250,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(10, (index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              height: 50,
+                              width: screenWidth * 0.30,
+                              color: Colors.amber,
+                            ),
+                            Positioned.fill(
+                              top: -10,
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: Transform.translate(
+                                  offset: const Offset(0, 0),
+                                  child: Card(
+                                    child: Container(
+                                      height: 17,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                      child: Text(
+                                        ConstString.kRecommended,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              )),
+        ],
+      );
+    } else {
+      return GestureDetector(
+        onTap: () {
+          stackNumber.value = 1;
+        },
+        child: SizedBox(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(ConstString.kCreditAmount),
+                    AppSizedBox.h5,
+                    Text(
+                        "₹${NumberFormat('#,##,##0').format(creditAmount.value)}"),
+                  ],
+                ),
+                const Center(
+                  child: Icon(Icons.arrow_downward_sharp),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget accountSelectionWidget({required int selectedStackIndex}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 50),
+      child: Wrap(
+        children: [
+          Text(
+            ConstString.kAccountSelectionQuestion,
+            style: TextStyle(color: AppColors.whiteColor, fontSize: 18),
+          ),
+          AppSizedBox.h15,
+          Text(
+            ConstString.kAccountSelectionMessage,
+            style: TextStyle(color: AppColors.whiteColor, fontSize: 14),
+          ),
+          AppSizedBox.h50,
+          SizedBox(
+            width: screenWidth * 0.95,
+            height: 250,
+            child: ListView.separated(
+              itemCount: 1,
+              scrollDirection: Axis.vertical,
+              itemBuilder: (context, index) {
+                return Row(
+                  children: [
+                    Container(
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Center(
+                        child: Image.asset(
+                          "assets/img/hdfc_logo.png",
+                          height: 15,
+                          width: 15,
+                        ),
+                      ),
+                    ),
+                    AppSizedBox.w10,
+                    const Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [Text("HDFC Bank"), Text("50100117009192")],
+                    ),
+                    const Spacer(),
+                    Radio(
+                      value: false,
+                      groupValue: true,
+                      fillColor: MaterialStateColor.resolveWith(
+                          (states) => Colors.green), //<-- SEE HERE
+                      onChanged: (value) {},
+                    ),
+                  ],
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return AppSizedBox.h20;
+              },
+            ),
+          ),
+          Container(child: Center(child: Text(ConstString.kChangeAccount),),)
+        ],
+      ),
+    );
+  }
+}
+
+
+class ConstString {
+  ConstString._();
+
+  static String kRecommended = "recommended";
+  static String kSeeCalculations = "See calculations";
+  static String kCreatePlan = "Create your own plan";
+  static String kCreditAmount = "credit amount";
+  static String kChangeAccount = "Change account";
+  static String kAmountSelectionButton = "Proceed to EMI selection";
+  static String kAmountSelectionQuestion = "how much do you need?";
+  static String kAmountSelectionMessage =
+      "move the dial and set any amount you need upto";
+  static String kAmountSelectionAnnouncement =
+      "stash is instant. money will be credited within seconds.";
+  static String kPlanSelectionButton = "Select your bank account";
+  static String kPlanSelectionQuestion = "how do you wish to repay?";
+  static String kPlanSelectionMessage =
+      "choose one of our recommend plans or make your own";
+  static String kAccountSelectionButton = "Tap for 1-click KYC";
+  static String kAccountSelectionQuestion = "where should we send the money?";
+  static String kAccountSelectionMessage =
+      "amount will be credited to this bank account, EMI will also be credited from this bank account";
+}
